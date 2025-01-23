@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oracle AI - Your Image Rating Bot</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+        <style>
+            html, body {
+                position: relative;
+                margin: 0;
+                padding: 0;
+                overflow-x: hidden;
+            }
+            body {
+                font-family: 'Inter', sans-serif;
+                background: linear-gradient(135deg, #121420 0%, #0a0c14 100%);
+                color: white;
+            }
+            #background-canvas {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: -1;
+                pointer-events: none;
+            }
+            .content-wrapper {
+                position: relative;
+                z-index: 10;
+            }
+            .gradient-text {
+                background: linear-gradient(90deg, #6EE7B7, #3B82F6);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .hero-gradient-ai {
+                font-size: 20vw;
+                font-weight: 900;
+                background: linear-gradient(45deg, #6EE7B7, #3B82F6, #9333EA);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                line-height: 0.9;
+            }
+            .letter {
+                position: fixed;
+                font-size: 48px;
+                font-weight: 900;
+                pointer-events: none;
+                opacity: 0.1;
+                z-index: -1;
+            }
+        </style>
+    </head>
+<body class="bg-black text-white">
+    
+    <!-- Navigation -->
+    <canvas id="background-canvas"></canvas>
+
+    <div class="content-wrapper">
+        <!-- Navigation -->
+        <nav class="fixed top-0 left-0 w-full z-50 bg-black/50 backdrop-blur-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center py-4">
+                <a href="#"><div class="text-2xl font-bold tracking-tight">ORACLE AI</div></a>
+                <div class="space-x-6">
+                    
+                    <a href="about-us/index.html" class="hover:text-green-400 transition">About us</a>
+                    <a href="privacy/index.html" class="hover:text-green-400 transition">Privacy Policy</a>
+                    <a href="terms/index.html" class="hover:text-green-400 transition">Terms of Service</a>
+                    <a href="https://discord.com/oauth2/authorize?client_id=1332026055388827730&permissions=8&integration_type=0&scope=bot" class="hover:text-green-400 transition">Add to Server</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <div class="min-h-screen flex items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="text-left">
+                    <h1 class="hero-gradient-ai">ai</h1>
+                    <blockquote class="text-2xl md:text-4xl font-bold mt-4 italic opacity-80">
+                        "I don't know how this works but I am in love" 
+                        <span class="block text-sm mt-2 opacity-60">- The third ever user</span>
+                    </blockquote>
+                </div>
+                <div class="space-y-6">
+                    <h2 class="text-4xl md:text-6xl font-extrabold">
+                        You never knew you needed this but now you do.
+                    </h2>
+                    <p class="text-xl text-gray-300 mb-8">
+                        Rate images instantly. Judge without mercy. Powered by cutting-edge AI.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-bold py-4 px-8 rounded-full transition transform hover:scale-105 shadow-2xl">
+                            Add to Your Server
+                        </a>
+                        <a href="#" class="border border-white/20 text-white font-bold py-4 px-8 rounded-full hover:bg-white/10 transition transform hover:scale-105">
+                            Learn More
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="bg-black/50 py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-5xl font-extrabold gradient-text">How Oracle AI Works</h2>
+                    <p class="mt-4 text-xl text-gray-300">Brutally honest. Incredibly fast. Surprisingly fun.</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-black/30 p-8 rounded-2xl border border-white/10 hover:border-white/30 transition">
+                        <div class="text-5xl mb-4 gradient-text">01</div>
+                        <h3 class="text-2xl font-bold mb-4">Instant Rating</h3>
+                        <p class="text-gray-300">Millisecond-fast AI judgment on any image you upload.</p>
+                    </div>
+                    <div class="bg-black/30 p-8 rounded-2xl border border-white/10 hover:border-white/30 transition">
+                        <div class="text-5xl mb-4 gradient-text">02</div>
+                        <h3 class="text-2xl font-bold mb-4">Discord Native</h3>
+                        <p class="text-gray-300">Seamlessly integrated into your favorite communication platform.</p>
+                    </div>
+                    <div class="bg-black/30 p-8 rounded-2xl border border-white/10 hover:border-white/30 transition">
+                        <div class="text-5xl mb-4 gradient-text">03</div>
+                        <h3 class="text-2xl font-bold mb-4">No Mercy Mode</h3>
+                        <p class="text-gray-300">Unfiltered, honest ratings that pull no punches.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-black/50 py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div class="text-3xl font-bold mb-4">ORACLE AI</div>
+                <div class="space-x-4 mb-8">
+                    <a href="about-us/index.html" class="hover:text-green-400 transition">About us</a>
+                    <a href="privacy/index.html" class="hover:text-green-400 transition">Privacy Policy</a>
+                    <a href="terms/index.html" class="hover:text-green-400 transition">Terms of Service</a>
+                    <a href="https://discord.com/oauth2/authorize?client_id=1332026055388827730&permissions=8&integration_type=0&scope=bot" class="hover:text-green-400 transition">Add to Server</a>
+                </div>
+                <div class="text-sm text-gray-500">
+                    © 2024 Oracle AI. All rights reserved.
+                </div>
+            </div>
+        </footer>
+    </div>
+
+</body>
+</html>
