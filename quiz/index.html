@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hi</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" type="module" defer></script>
+    <script src="quizapp.js" type="module" defer></script>
+    <script src="hoversystem.js" type="module" defer></script>
+</head>
+
+<body>
+    <div id="side">
+        <div id="log">
+            <h3>
+                Log
+            </h3>
+            <hr>
+            <div id="loginner">
+                Game start apt apt apt <br>
+            </div>
+        </div>
+        <div id="shop">
+
+        </div>
+        <div id="section">
+            <button id="step">NEXT ROUND</button>
+        </div>
+        <div id="quizcontainer">
+            Unlock questions after round 10. <br>
+            Choosing the correct answer will give you 100 coins. <br>
+            Questions refresh each round
+        </div>
+
+    </div>
+
+
+    <div class="container">
+        <header>
+            <h1 class="game-title">AUCTION</h1>
+            <div class="player-stats">
+                <div class="stat">Round: <span id="round-counter">1</span></div>
+                <div class="stat balance">Balance: <span id="total-coins">0</span></div>
+                <div class="stat balance">TRANSFERS LEFT: <span id="tq">0</span>/<span id="tql">1500</span></div>
+                <div class="stat info" id="help">HELP</div>
+            </div>
+        </header>
+
+        <main class="game-board" id="board">
+
+        </main>
+    </div>
+</body>
+
+</html>
