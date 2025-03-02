@@ -1,4 +1,4 @@
-import { infomodal } from "./templates.js";
+import { infomodal, winscreenmodal } from "./templates.js";
 import { QuizApp } from "./quizapp.js";
 import { HoverInfoSystem } from "./hoversystem.js"
 import { shopitems } from './shop.js';
@@ -10,9 +10,8 @@ TODO
 - more traits
 - Conspiracy theorists
 - Tax evaders
-- adjacent Character alliances (mine will be different, they will just split earnings but not losses)
-  only people with Entrepeneur trait will be able to start one (max 3 people,spreads randomly)
-  when one dies everything falls apart and everyone has to pay 300 coins for funeral
+
+- scoring system is wack (actually playing the game gives lower scores than spamming next round)
 
 
 
@@ -87,6 +86,60 @@ let transferlimit = 1500;
 let deductFive = false;
 let deductTen = false;
 let percenttaxreduction = false;
+
+
+// data collection (creepy era)
+let gameLog = {
+    score: 0,
+    rounds: [],
+    characterEvents: [],
+    playerEvents: [],
+    traitActivations: [],
+    deaths: [],
+    retirements: [],
+    transactions: []
+};
+
+class RoundData {
+    constructor(roundNumber) {
+        this.roundNumber = roundNumber;
+        this.playerBalance = playerbalance;
+        this.transferredThisRound = transferredthisround;
+        this.transferLimit = transferlimit;
+        this.timestamp = new Date().toISOString();
+        this.characterSnapshots = charsInGame.map(char => ({
+            id: char.id,
+            name: char.name,
+            balance: char.balance,
+            previousBalance: char.previousBalance,
+            traits: char.traits.map(t => t.name),
+            isRetired: char.isRetired,
+            parrots: char.parrots,
+            hasToShare: char.hastoshare,
+            sharingPartners: char.sharingwith.map(p => p.id)
+        }));
+    }
+}
+
+class CharacterEvent {
+    constructor(characterId, eventType, details) {
+        this.roundNumber = roundnum;
+        this.characterId = characterId;
+        this.eventType = eventType;
+        this.details = details;
+        this.timestamp = new Date().toISOString();
+    }
+}
+
+class PlayerEvent {
+    constructor(eventType, details) {
+        this.roundNumber = roundnum;
+        this.eventType = eventType;
+        this.details = details;
+        this.timestamp = new Date().toISOString();
+        this.playerBalance = playerbalance;
+    }
+}
 function handleDragStart(e) {
     const card = e.currentTarget;
     draggedIndex = Array.from(card.parentNode.children).indexOf(card);
@@ -199,35 +252,62 @@ function randint(from, to) {
 }
 
 function Delta(character, amount, forcesend = false) {
-    // Check if the player can afford to give money to the character
+    const originalPlayerBalance = playerbalance;
+    const originalCharBalance = character.balance;
+
+    // Check transfer limit first
     if (transferredthisround + Math.abs(amount) > transferlimit) {
-        log(`⛔ YOU CANNOT MOVE MORE MONEY THIS ROUND`)
-        return
+        log(`⛔ YOU CANNOT MOVE MORE MONEY THIS ROUND`);
+        return;
     }
 
-    if (playerbalance >= amount || forcesend) {
-        // Player can afford, so proceed with the transaction
-        if (character.balance + amount > 0) {
-            playerbalance -= amount + Math.abs(amount)*0.02;
-            character.balance += amount;
+    // Taking money from character (negative amount)
+    if (amount < 0) {
+        if (character.balance >= Math.abs(amount)) {
+            // Character has enough to give
+            character.balance += amount; // Subtract from character
+            playerbalance -= amount; // Add to player (minus becomes plus)
+            // Tax calculation removed when taking money
         } else {
-            playerbalance += character.balance*0.95;
+            // Take whatever the character has left
+            playerbalance += character.balance * 0.95;
             character.balance = 0;
         }
-
-        transferredthisround += Math.abs(amount)
-
-        const tq = document.querySelector("#tq");
-        tq.innerHTML = transferredthisround;
-
-
-        const balancecounter = document.querySelector("#total-coins");
-        balancecounter.innerHTML = Math.floor(playerbalance);
-        console.log(playerbalance);
-    } else {
-        // Player can't afford to give the amount, so don't do anything
-        log(`⛔ YOU CANNOT AFFORD SENDING ${amount} TO ${character.name}`);
     }
+    // Giving money to character (positive amount)
+    else if (amount > 0) {
+        if (playerbalance >= amount || forcesend) {
+            character.balance += amount;
+            playerbalance -= amount + (amount * 0.02); // 2% tax on giving
+        } else {
+            log(`⛔ YOU CANNOT AFFORD SENDING ${amount} TO ${character.name}`);
+            return;
+        }
+    }
+
+    // Update transfer amount tracking
+    transferredthisround += Math.abs(amount);
+
+    // Update UI
+    const tq = document.querySelector("#tq");
+    tq.innerHTML = transferredthisround;
+
+    const balancecounter = document.querySelector("#total-coins");
+    balancecounter.innerHTML = Math.floor(playerbalance);
+
+    // Log transaction
+    gameLog.transactions.push({
+        roundNumber: roundnum,
+        timestamp: new Date().toISOString(),
+        characterId: character.id,
+        characterName: character.name,
+        amount: amount,
+        playerBalanceBefore: originalPlayerBalance,
+        playerBalanceAfter: playerbalance,
+        characterBalanceBefore: originalCharBalance,
+        characterBalanceAfter: character.balance,
+        forceSend: forcesend
+    });
 }
 class Trait {
     constructor(name, description, effect) {
@@ -265,7 +345,7 @@ let trait_scammer = new Trait("Scammer","Can choose a random character around th
 })
 let trait_gremlin = new Trait("Gremlin","Steals coins from the richest character every round",(char)=>{
     let clone = [...charsInGame]
-    clone = clone.sort((a,b)=> a.balance - b.balance)
+    clone = clone.sort((a,b)=> b.balance - a.balance)
     if (clone.length == 20) {
         deltaChars(clone[0],char,-10)
     }
@@ -289,7 +369,7 @@ let trait_parrothoarder = new Trait("Parrot hoarder","Adopts a parrot every 3 ro
         char.parrots++;
     }
 })
-let trait_entrepeneur = new Trait("Entrepreneur","Adjacent characters start a firm and have to split 30% of revenue/losses of any of the 9 characters. If one character dies, the owner pays 300 for their funeral and the firm collapses",(char)=>{
+let trait_entrepereneur = new Trait("Entrepreneur","Adjacent characters start a firm and have to split 30% of revenue/losses of any of the 9 characters. If one character dies, the owner pays 300 for their funeral and the firm collapses",(char)=>{
     console.log(char.id)
     let idx = findindexofchar(char.id);
     let neighbors = getNeighbors(idx,true);
@@ -300,15 +380,14 @@ let trait_entrepeneur = new Trait("Entrepreneur","Adjacent characters start a fi
     company.forEach((target)=>{
         console.log(target,charsInGame[target])
         target = charsInGame[target]
-        if (target.lastentrepeneur != char) {
-            target.lastentrepeneur = char
+        if (target.lastentrepereneur != char) {
+            target.lastentrepereneur = char
             target.hastoshare = true
             target.sharingwith = company.map((x)=>charsInGame[x])
         }
     })
     
 })
-
 let trait_magician = new Trait("Magician","Each round increases adjacent characters value by 2.5%. Does not increase own value. Does not add money to a character if their value is more than 9000 coins",(char)=>{
     console.log(char.id)
     let idx = findindexofchar(char.id);
@@ -325,10 +404,10 @@ const traits = [
     [0.4,trait_gremlin],
     [0.3,trait_scammer],
     [0.3,trait_investor],
-    [0.2,trait_queen],
     [0.1,trait_parrothoarder],
-    [0.1,trait_entrepeneur],
-    [0.1,trait_magician]
+    [0.1,trait_entrepereneur],
+    [0.05,trait_queen],
+    [0.05,trait_magician]
 ]
 
 function randomtrait() {
@@ -514,7 +593,7 @@ class Character {
 
         this.hastoshare = false;
         this.sharingwith = [];
-        this.lastentrepeneur = null;
+        this.lastentrepereneur = null;
     }
 
     addTrait(trait) {
@@ -526,16 +605,42 @@ class Character {
     }
 
     applyTraits() {
-        this.usedAbility = false; 
+        this.usedAbility = false;
         this.traits.forEach(trait => {
             const result = trait.applyEffect(this);
             if (result) {
-                this.usedAbility = true; 
+                this.usedAbility = true;
+                
+                // Log trait activation
+                gameLog.traitActivations.push({
+                    roundNumber: roundnum,
+                    timestamp: new Date().toISOString(),
+                    characterId: this.id,
+                    characterName: this.name,
+                    traitName: trait.name,
+                    characterBalanceBefore: this.previousBalance,
+                    characterBalanceAfter: this.balance
+                });
             }
         });
     }
 
     updateBalance(newBalance) {
+        // check if there are entrepereneurs nearby. if there arent any nearby they were moved/died and they dont have to share money anymore
+        let neighbors = getNeighbors(findindexofchar(this.id),true).map((idx)=>charsInGame[idx]);
+        let foundentrepereneur = false;
+        neighbors.forEach((neighbor)=>{
+            neighbor.traits.forEach((trait)=>{
+                if (trait == trait_entrepereneur) {
+                    foundentrepereneur = true;
+                }
+            })
+        })
+        if (!foundentrepereneur) {
+            this.hastoshare = false;
+            this.sharingwith = [];
+        }
+
         if (this.hastoshare && this.sharingwith.length != 0) {
             console.log(this.hastoshare, this.sharingwith, this.balance, newBalance, this.previousBalance);
             this.previousBalance = this.balance;
@@ -588,8 +693,19 @@ class Character {
         }
 
         if (this.balance >= 10000) {
+            if (this.isRetired == false) {
+                gameLog.retirements.push({
+                    roundNumber: roundnum,
+                    timestamp: new Date().toISOString(),
+                    characterId: this.id,
+                    characterName: this.name,
+                    finalBalance: this.balance,
+                    traits: this.traits.map(t => t.name)
+                });
+            }
             this.isRetired = true;
             classes.push('retired');
+
         } else {
             this.isRetired = false;
         }
@@ -602,7 +718,18 @@ class Character {
     }
 }
 
-
+function exportGameLog() {
+    const logData = JSON.stringify(gameLog, null, 2);
+    const blob = new Blob([logData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `game_log_${new Date().toISOString()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
 
 function tripleshuffle(arr) {
     for(let i  = 0; i < 3; i++) {
@@ -617,7 +744,9 @@ function tripleshuffle(arr) {
 function createchar() {
     let caca = chars.shift();
     if (!caca) {
+        winscreen()
         log("⛔ STOP: no characters left to create")
+        return
     }
     let name = caca[0];
     let url = caca[1] || "";
@@ -665,8 +794,114 @@ function deltaChars(sender, recipient, amount) {
     console.log(`${sender.name} balance: ${sender.balance}`);
     console.log(`${recipient.name} balance: ${recipient.balance}`);
 }
+function calculateScore() {
+    // Base scores for character management
+    const retiredCharactersScore = charsInGame
+        .filter(char => char.isRetired)
+        .reduce((sum, char) => {
+            // More points for characters retired earlier
+            const earlyRetirementBonus = Math.max(0, 50 * (30 - roundnum));
+            return sum + Math.floor(char.balance / 50) + earlyRetirementBonus;
+        }, 0);
+    
+    const activeCharactersScore = charsInGame
+        .filter(char => !char.isRetired)
+        .reduce((sum, char) => {
+            // Reward maintaining high balances
+            const balancePoints = Math.floor(char.balance / 100);
+            // Bonus for characters close to retirement
+            const nearRetirementBonus = char.balance >= 8000 ? 200 : 0;
+            return sum + balancePoints + nearRetirementBonus;
+        }, 0);
+    
+    // Player engagement scoring
+    const transactionVolume = gameLog.transactions
+        .filter(t => t.roundNumber <= roundnum)
+        .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    
+
+    const transactioncountbonus = gameLog.transactions.length > 20 ? 1000 : -1000
+    const playerActivityScore = Math.floor(transactionVolume / 400);
+    const baseroundscore = roundnum * 100;
+    // Strategic scoring
+    const averageBalance = charsInGame.reduce((sum, char) => sum + char.balance, 0) / charsInGame.length;
+    const balanceDistributionScore = averageBalance >= 2000 ? 500 : 0;
+    
+    const lateStagePenalty = roundnum > 40 ? Math.pow(roundnum,1.25) : 0;
+    
+    // Trait management scoring
+    const traitBonus = charsInGame.reduce((sum, char) => {
+        if (char.traits.length > 1) {
+            // Exponential bonus for managing multiple traits
+            return sum + (Math.pow(2, char.traits.length) * 100);
+        }
+        return sum;
+    }, 0);
+    
+    // Calculate final score
+    const totalScore = 
+        retiredCharactersScore +
+        activeCharactersScore +
+        playerActivityScore +
+        baseroundscore + 
+        balanceDistributionScore +
+        transactioncountbonus + 
+        lateStagePenalty +
+        traitBonus;
+    
+    return [
+        Math.floor(totalScore),
+        {
+            baseRoundScore: baseroundscore,
+            retiredCharacters: retiredCharactersScore,
+            activeCharacters: activeCharactersScore,
+            playerActivity: playerActivityScore,
+            transactionCount: transactioncountbonus,
+            balanceDistribution: balanceDistributionScore,
+            lateGamePenalty: lateStagePenalty,
+            traits: traitBonus
+        }
+    ];
+}
+function winscreen() {
+    let calcscore = calculateScore();
+    let total = calcscore[0];
+    let breakdown = calcscore[1]
+    gameLog.score = calcscore;
+    let richest = charsInGame.sort((a,b)=>b.balance-a.balance)[0];
+
+
+    let modalcontainer = document.createElement("div");
+    modalcontainer.classList.add("modalcontainer");
+    document.body.prepend(modalcontainer);
+    modalcontainer.innerHTML = winscreenmodal
+        .replace("%IMAGEURL%",richest.imageurl)
+        .replace("%SCORE%",total);
+
+    let btncontainer = modalcontainer.querySelector(".winbuttoncontainer");
+
+    const restartBtn = document.createElement("button");
+    restartBtn.textContent = "Restart";
+    restartBtn.classList.add("restart");
+    restartBtn.addEventListener("click", () => {
+        location.reload()
+    });
+
+    const downloadLogsBtn = document.createElement("button");
+    downloadLogsBtn.textContent = "Export logs";
+    downloadLogsBtn.classList.add("downloadlogs");
+    downloadLogsBtn.addEventListener("click", () => {
+        exportGameLog();
+    });
+
+    btncontainer.appendChild(restartBtn);
+    btncontainer.appendChild(downloadLogsBtn);
+
+}
+
 function render(chars) {
     if (!chars) {
+        winscreen();
         log("⛔ STOP: no characters left to render")
         return
     }
@@ -761,9 +996,21 @@ function render(chars) {
 }
 function isdead(character) {
     if (character.balance <= 0) {
-        log(`💀 ${character.name} has died with ${character.balance} coins`)
+        log(`💀 ${character.name} has died with ${character.balance} coins`);
+        gameLog.deaths.push({
+            roundNumber: roundnum,
+            timestamp: new Date().toISOString(),
+            characterId: character.id,
+            characterName: character.name,
+            finalBalance: character.balance,
+            traits: character.traits.map(t => t.name),
+            replacementCharacterId: null  // Will be set below
+        });
+
+
         const index = charsInGame.indexOf(character);
         const newChar = createchar();
+        gameLog.deaths[gameLog.deaths.length - 1].replacementCharacterId = newChar.id;
         newChar.isNew = true;
         charsInGame[index] = newChar;
 
@@ -773,7 +1020,7 @@ function isdead(character) {
         balancecounter.innerHTML = Math.floor(playerbalance);
 
         if (character.hastoshare && character.sharingwith.length != 0) {
-            character.lastentrepeneur.updateBalance(character.lastentrepeneur.balance - 300);
+            character.lastentrepereneur.updateBalance(character.lastentrepereneur.balance - 300);
             character.sharingwith.forEach((target)=>{
                 target.sharingwith = [];
                 target.hastoshare = false;
@@ -795,7 +1042,7 @@ function step(cig) {
     const tql = document.querySelector("#tql");
     tql.innerHTML = Math.floor(transferlimit);
 
-    if (roundnum > 1){
+    if (roundnum > 9){
         const quizApp = new QuizApp(document.querySelector("#quizcontainer"), {
             onCorrectAnswer: () => {
                 playerbalance += 100;

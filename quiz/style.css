@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Imperial+Script&display=swap');
 :root {
     --primary-color: #ffffff;
     --secondary-color: #d4f495;
@@ -298,17 +299,18 @@ header {
 }
 .hover-info-box {
     position: fixed;
-    background: rgba(0, 0, 0, 0.9);
-    color: white;
+    background-color: white;
+    border-radius: 8px;
+    color: var(--text-color);
     padding: 8px 12px;
-    border-radius: 4px;
     font-size: 14px;
     max-width: 250px;
     pointer-events: none;
     z-index: 1000;
     opacity: 0;
-    transition: opacity 0.15s ease;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: opacity 0.1s ease;
+    border: 2px solid black;
+    box-shadow: var(--shadow-color) 0px 10px 8px;
 }
 
 .hover-info-box.visible {
@@ -353,6 +355,72 @@ header {
     height: 90%;
     margin: auto;
 }
+.gameover {
+    font-family: "Imperial Script", serif;
+    font-weight: 400;
+    font-style: normal;
+}
+.gameover {
+    font-size: 10vh;
+    text-align: center;
+}
+.winscorecontainer {
+    height: 26vh;
+    border-radius: 2vh 2vh 0 0;
+    background-color: black;
+    box-shadow: inset rgba(6, 47, 3, 0.5) 0px -10vh 15vh ;
+}
+.winscorelabel {
+    font-size: 5vh;
+    color: white;
+    text-align: center;
+    padding-top: 1vh;
+    box-sizing: border-box;
+    font-weight: 400;
+}
+.score {
+    font-size: 12vh;
+    text-align: center;
+    color: var(--secondary-color);
+}
+.downloadlogs, .restart {
+    height: 8vh;
+    width: 100%;
+    margin-top: 2vh;
+    border: 1px solid #8a8a8a;
+    background-color: white;
+    font-size: 2vh;
+}
+.downloadlogs {
+    background-color: var(--secondary-color);
+    border: none;
+    border-radius: 0 0 0.5vh 0;
+}
+.restart {
+    border-radius: 0 0 0 0.5vh;
+}
+.winbuttoncontainer {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 2vh;
+}
+
+.pointbreakdown {
+    height: 10vh;
+    overflow-y: scroll;
+    margin-top: 2vh;
+    width: 100%;
+    border: 1px solid #8a8a8a;
+}
+.pointbreakdown table {
+    width: 100%;
+    border-collapse: collapse;
+
+}
+.pointbreakdown table tr:nth-child(odd) {
+    background-color: var(--secondary-color);
+}
+
 
 @keyframes bump {
     0% {

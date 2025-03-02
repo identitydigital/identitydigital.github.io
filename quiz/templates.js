@@ -6,7 +6,7 @@ export const infomodal = `
                 There are X characters on your board. <br>
                 You can either give a character coins OR take them away (250 or 50). <br>
                 Every round each character donates 50 coins to charity.<br>
-                <span style="font-weight:600">With each round tax increases making your characters pay more every time.</span> <br>
+                <span style="font-weight:600">With each round tax increases making your characters pay more every time.</span><br>
                 <span style="font-weight:600">When a character has 0 coins or is in debt, they die from hunger and are removed from the board and
                 replaced with a new character</span><br>
                 When a characters balance reaches 10 000 coins, they retire with all their wealth and generate passive
@@ -16,7 +16,6 @@ export const infomodal = `
                 How to get money:
             <ol>
                 <li>Take 50 or 250 coins from someone</li>
-                <li>+5 coins for each character whose balance didnt decrease this round</li>
                 <li>+100 coins when answering a trivia question correctly</li>
             </ol>
 
@@ -55,3 +54,15 @@ export const infomodal = `
             </p>
         </div>
         `
+
+
+export const winscreenmodal = `
+       <div class="modal" class="winscreencontainer" style="overflow-y: hidden; width: 40vw;"> 
+            <h3 class="gameover">Everyone died.</h3>
+            <div class="winscorecontainer" style="background: linear-gradient( rgba(0, 0, 0, 0.7),  rgba(0, 0, 0, 0.7)), url('%IMAGEURL%'); background-size: cover;">
+                <h2 class="winscorelabel">score:</h2>
+                <h3 class="score">%SCORE%</h3>
+            </div>
+            <div class="winbuttoncontainer">
+            </div>
+        </div>`

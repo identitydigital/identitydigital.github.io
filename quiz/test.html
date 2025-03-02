@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .gameover {
+            font-size: 10vh;
+            text-align: center;
+        }
+        .winscorecontainer {
+            height: 26vh;
+            border-radius: 2vh 2vh 0 0;
+            background-color: black;
+            box-shadow: inset rgba(6, 47, 3, 0.5) 0px -10vh 15vh ;
+        }
+        .winscorelabel {
+            font-size: 5vh;
+            color: white;
+            text-align: center;
+            padding-top: 1vh;
+            box-sizing: border-box;
+            font-weight: 400;
+        }
+        .score {
+            font-size: 12vh;
+            text-align: center;
+            color: rgb(119, 236, 98);
+        }
+        .downloadlogs, .restart {
+            height: 8vh;
+            width: 100%;
+            margin-top: 2vh;
+            border: 1px solid #8a8a8a;
+            background-color: white;
+            font-size: 2vh;
+        }
+        .downloadlogs {
+            background-color: rgb(119, 236, 98);
+            border: none;
+            border-radius: 0 0 0.5vh 0;
+        }
+        .restart {
+            border-radius: 0 0 0 0.5vh;
+        }
+        .winbuttoncontainer {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 2vh;
+        }
+    </style>
+</head>
+<body>
+    <div class="modalcontainer">
+        <div class="modal" class="winscreencontainer" style="overflow-y: hidden; width: 40vw;"> 
+            <h3 class="gameover">Everyone died.</h3>
+            <div class="winscorecontainer" style="background: linear-gradient( rgba(0, 0, 0, 0.7),  rgba(0, 0, 0, 0.7)), url('%IMAGEURL%'); background-size: cover;">
+                <h2 class="winscorelabel">score:</h2>
+                <h3 class="score">%SCORE%</h3>
+            </div>
+            <div class="pointbreakdown">
+                <table>
+                    <tr>
+                        <th style="width: 80%; margin: 0;">Category</th>
+                        <th style="width: 25%; margin: 0;">Points</th>
+                      </tr>
+                    <tr>
+                        <td>Basescore</td>
+                        <td>1500</td>
+                    </tr>
+                    <tr>
+                        <td>Basescore</td>
+                        <td>1500</td>
+                    </tr>
+                    <tr>
+                        <td>Basescore</td>
+                        <td>1500</td>
+                    </tr>
+                    <tr>
+                        <td>Basescore</td>
+                        <td>1500</td>
+                    </tr>
+                    <tr>
+                        <td>Basescore</td>
+                        <td>1500</td>
+                    </tr>
+                    <tr>
+                        <td>Basescore</td>
+                        <td>1500</td>
+                    </tr>
+                    <tr>
+                        <td>Basescore</td>
+                        <td>1500</td>
+                    </tr>
+                    <tr>
+                        <td>Basescore</td>
+                        <td>1500</td>
+                    </tr>
+                    <tr>
+                        <td>Basescore</td>
+                        <td>1500</td>
+                    </tr>
+                    <tr>
+                        <td>Basescore</td>
+                        <td>1500</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="winbuttoncontainer">
+                <button class="restart">Restart</button>
+                <button class="downloadlogs">Export logs</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
